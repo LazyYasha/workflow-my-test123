@@ -3,16 +3,23 @@ name: Main Multi-Lane Pipeline
 on:
   push:
     branches: [main]
-  workflow_dispatch: # 支持在 Actions 页面手动点击运行
+  workflow_dispatch:
 
 jobs:
-  run-lanes:
-    strategy:
-      fail-fast: false
-      matrix:
-        # 并行拆分为 3 条泳道
-        target: [service-alpha, service-beta, service-gamma]
-    # 调用同仓库下的子工作流
-    uses: ./.github/workflows/__reuse.yml
+  # 泳道 1
+  service-alpha:
+    uses: ./.github/workflows/reusable-pipeline.yml
     with:
-      target: ${{ matrix.target }}
+      target: service-alpha
+
+  # 泳道 2（与 1 完全并行）
+  service-beta:
+    uses: ./.github/workflows/reusable-pipeline.yml
+    with:
+      target: service-beta
+
+  # 泳道 3（与 1、2 完全并行）
+  service-gamma:
+    uses: ./.github/workflows/reusable-pipeline.yml
+    with:
+      target: service-gamma
