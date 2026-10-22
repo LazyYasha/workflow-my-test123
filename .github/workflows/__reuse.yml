@@ -1,0 +1,42 @@
+name: Reusable Sub Pipeline
+
+on:
+  workflow_call:
+    inputs:
+      target:
+        required: true
+        type: string
+
+jobs:
+  # 阶段 1：构建
+  build:
+    name: Build (${{ inputs.target }})
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build step
+        run: |
+          echo "Compiling and packaging for target: ${{ inputs.target }}"
+          sleep 5
+
+  # 阶段 2：测试（串行依赖 build）
+  test:
+    name: Test (${{ inputs.target }})
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test step
+        run: |
+          echo "Running unit tests for target: ${{ inputs.target }}"
+          sleep 5
+
+  # 阶段 3：部署（串行依赖 test）
+  deploy:
+    name: Deploy (${{ inputs.target }})
+    needs: test
+    runs-on: ubuntu-latest
+    # 若配置了 Environment 保护规则，这里会触发针对该 target 的独立人工审批
+    environment: deploy-${{ inputs.target }}
+    steps:
+      - name: Deploy step
+        run: |
+          echo "Deploying target: ${{ inputs.target }} to destination"

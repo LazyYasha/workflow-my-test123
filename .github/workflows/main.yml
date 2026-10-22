@@ -1,0 +1,18 @@
+name: Main Multi-Lane Pipeline
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # 支持在 Actions 页面手动点击运行
+
+jobs:
+  run-lanes:
+    strategy:
+      fail-fast: false
+      matrix:
+        # 并行拆分为 3 条泳道
+        target: [service-alpha, service-beta, service-gamma]
+    # 调用同仓库下的子工作流
+    uses: ./.github/workflows/__reuse.yml
+    with:
+      target: ${{ matrix.target }}
